@@ -1,0 +1,3 @@
+%__jmod_provides	%{_rpmconfigdir}/jmod.deps -P
+%__jmod_requires	%{_rpmconfigdir}/jmod.deps
+%__jmod_path		^.*\.([Jj][Mm][Oo][Dd]|[Jj][Aa][Rr])$

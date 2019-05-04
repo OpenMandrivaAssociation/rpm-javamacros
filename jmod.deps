@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# Java module/jar dependency generator for rpm
+# (C) 2019 Bernhard Rosenkraenzer <bero@lindev.ch>
+# Released under the GNU General Public License (GPL) v3
+
+if [ -z "$JAVA_HOME" ]; then
+	[ -e /etc/profile.d/90java.sh ] && . /etc/profile.d/90java.sh
+fi
+[ "$1" = "-P" -o "$1" = "--provides" ] && PROVIDES=true || PROVIDES=false
+FILES=0
+while read file; do
+	if echo $file |grep -q '\.jmod$'; then
+		FIRSTLINE=true
+		LANG=C LC_ALL=C $JAVA_HOME/bin/jmod describe $file 2>/dev/null | {
+			while read l; do
+				if $FIRSTLINE; then
+					if $PROVIDES; then
+						echo "jmod($l)"
+						echo $l |grep -q '@' && echo "jmod($(echo $l |cut -d@ -f1))"
+					fi
+					FIRSTLINE=false
+				elif $PROVIDES && echo $l |grep -qE '^(exports|contains) '; then
+					echo "java($(echo $l |cut -d' ' -f2-))"
+				elif ! $PROVIDES && echo $l |grep -q '^requires'; then
+					echo "jmod($(echo $l |cut -d' ' -f2))"
+				elif ! $PROVIDES && echo $l |grep -q '^uses '; then
+					# UNSAFE -- generates some Requires:
+					# that aren't provided anywhere
+					# because they're subclasses
+					# (e.g. com.sun.jdi.connect.Connector where only com.sun.jdi is provided)
+					#echo "java($(echo $l |cut -d' ' -f2))"
+					:
+				fi
+			done
+		}
+	elif echo $file |grep -q '\.jar$'; then
+		FIRSTLINE=true
+		LANG=C LC_ALL=C $JAVA_HOME/bin/jar --describe-module -f $file 2>/dev/null | {
+			while read l; do
+				[ -z "$l" ] && continue
+				echo $l |grep -q 'No module descriptor' && continue
+				if $FIRSTLINE; then
+					$PROVIDES && echo "jmod($(echo $l |cut -d' ' -f1))"
+					FIRSTLINE=false
+				elif $PROVIDES && echo $l |grep -qE '^(exports|contains) '; then
+					echo "java($(echo $l |cut -d' ' -f2-))"
+				elif ! $PROVIDES && echo $l |grep -q '^requires'; then
+					echo "jmod($(echo $l |cut -d' ' -f2))"
+				fi
+			done
+		}
+	fi
+done
