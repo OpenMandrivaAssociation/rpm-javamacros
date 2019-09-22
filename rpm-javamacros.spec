@@ -6,7 +6,7 @@ Group:		Development/Java
 License:	GPLv3
 Source0:	jmod.deps
 Source1:	jmod.attr
-Requires:	jdk-current
+Requires:	java-12-openjdk
 BuildArch:	noarch
 
 %description
