@@ -1,12 +1,12 @@
 Name:		rpm-javamacros
 Version:	1.0
-Release:	2
+Release:	3
 Summary:	RPM macros for dealing with Java files
 Group:		Development/Java
 License:	GPLv3
 Source0:	jmod.deps
 Source1:	jmod.attr
-Requires:	java-14-openjdk
+Requires:	java-15-openjdk
 BuildArch:	noarch
 
 %description
