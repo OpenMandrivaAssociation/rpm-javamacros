@@ -1,6 +1,6 @@
 Name:		rpm-javamacros
 Version:	1.0
-Release:	5
+Release:	6
 Summary:	RPM macros for dealing with Java files
 Group:		Development/Java
 License:	GPLv3
